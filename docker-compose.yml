@@ -1,0 +1,12 @@
+version: '3.1'
+services:
+  publisher:
+    image: test-publisher
+    build:
+      context: .
+      dockerfile: ./Dockerfile-Publisher
+  subscriber:
+    image: test-subscriber
+    build:
+      context: .
+      dockerfile: ./Dockerfile-Subscriber

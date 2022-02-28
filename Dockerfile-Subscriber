@@ -1,0 +1,31 @@
+# https://hub.docker.com/_/microsoft-dotnet
+FROM mcr.microsoft.com/dotnet/sdk:6.0-windowsservercore-ltsc2019 AS build
+
+WORKDIR /source
+
+# copy csproj and restore as distinct layers
+COPY RTI.SANDBOX.SUBSCRIBER/*.csproj RTI.SANDBOX.SUBSCRIBER/
+COPY RTI.SANDBOX.SHARED/*.csproj RTI.SANDBOX.SHARED/
+COPY /*.sln ./
+#RUN nuget restore
+RUN dotnet restore RTI.SANDBOX.SUBSCRIBER/RTI.SANDBOX.SUBSCRIBER.csproj
+
+
+# copy and build app and libraries
+COPY RTI.SANDBOX.SUBSCRIBER/ RTI.SANDBOX.SUBSCRIBER/
+COPY RTI.SANDBOX.SHARED/ RTI.SANDBOX.SHARED/
+WORKDIR /source/RTI.SANDBOX.SUBSCRIBER
+#RUN dotnet build -c release --no-restore
+
+
+FROM build AS publish
+RUN dotnet publish --output /app --runtime win-x64 --configuration Release   -p:PublishSingleFile=true --self-contained true -p:PublishTrimmed=true
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/runtime:6.0-windowsservercore-ltsc2019
+USER ContainerAdministrator
+
+
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["rti.sandbox.subscriber.exe"]

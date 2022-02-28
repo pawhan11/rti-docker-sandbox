@@ -1,0 +1,7 @@
+/.vs
+obj
+bin
+/.dockerignore.bak
+/docker-compose.yml.bak
+/Dockerfile-Publisher.bak
+/Dockerfile-Subscriber.bak
